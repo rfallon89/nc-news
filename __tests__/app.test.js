@@ -29,4 +29,29 @@ describe("App API, /api", () => {
       });
     });
   });
+  describe("API endpoint articles", () => {
+    describe("GET request", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/articles").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            console.log(body);
+            expect(body).toHaveProperty("articles");
+            expect(body.articles.length).toBe(12);
+            expect(body.articles[0]).toHaveProperty("author");
+            expect(body.articles[0]).toHaveProperty("title");
+            expect(body.articles[0]).toHaveProperty("article_id");
+            expect(body.articles[0]).toHaveProperty("topic");
+            expect(body.articles[0]).toHaveProperty("created_at");
+            expect(body.articles[0]).toHaveProperty("votes");
+            expect(body.articles[0]).toHaveProperty("article_img_url");
+            expect(body.articles[0]).toHaveProperty("comment_count");
+          });
+      });
+    });
+  });
 });
