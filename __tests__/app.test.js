@@ -3,6 +3,7 @@ const app = require("../app/app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
+const { forEach } = require("../db/data/test-data/articles");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -41,14 +42,30 @@ describe("App API, /api", () => {
           .then(({ body }) => {
             expect(body).toHaveProperty("articles");
             expect(body.articles.length).toBe(12);
-            expect(body.articles[0]).toHaveProperty("author");
-            expect(body.articles[0]).toHaveProperty("title");
-            expect(body.articles[0]).toHaveProperty("article_id");
-            expect(body.articles[0]).toHaveProperty("topic");
-            expect(body.articles[0]).toHaveProperty("created_at");
-            expect(body.articles[0]).toHaveProperty("votes");
-            expect(body.articles[0]).toHaveProperty("article_img_url");
-            expect(body.articles[0]).toHaveProperty("comment_count");
+            for (let i = 0; i < 12; i++) {
+              let article = body.articles[i];
+              expect(article).toHaveProperty("author");
+              expect(article).toHaveProperty("title");
+              expect(article).toHaveProperty("article_id");
+              expect(article).toHaveProperty("topic");
+              expect(article).toHaveProperty("created_at");
+              expect(article).toHaveProperty("votes");
+              expect(article).toHaveProperty("article_img_url");
+              expect(article).toHaveProperty("comment_count");
+            }
+          });
+      });
+      it("returns a json object with the relevant information sorted by date in descending order", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            const articleDateArr = [];
+            articles.forEach((article) =>
+              articleDateArr.push(article.created_at)
+            );
+            const sortedDateArr = [...articleDateArr].sort((a, b) => b - a);
+            expect(articleDateArr).toEqual(sortedDateArr);
           });
       });
     });
