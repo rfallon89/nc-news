@@ -1,6 +1,8 @@
 const apiRouter = require("express").Router();
-const { topicsRouter } = require("./index.routes");
+const { topicsRouter, usersRouter } = require("./index.routes");
 
 apiRouter.use("/topics", topicsRouter);
+
+apiRouter.use("/users", usersRouter);
 
 module.exports = apiRouter;

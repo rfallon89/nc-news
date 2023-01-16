@@ -29,4 +29,23 @@ describe("App API, /api", () => {
       });
     });
   });
+  describe("API endpoint users", () => {
+    describe("GET request", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/users").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).toHaveProperty("users");
+            expect(body.users.length).toBe(4);
+            expect(body.users[0]).toHaveProperty("username");
+            expect(body.users[0]).toHaveProperty("name");
+            expect(body.users[0]).toHaveProperty("avatar_url");
+          });
+      });
+    });
+  });
 });
