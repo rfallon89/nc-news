@@ -117,7 +117,6 @@ describe("App API, /api", () => {
           .send({ username: "lurker", body: "test1...2" })
           .expect(200)
           .then(({ body: { successful } }) => {
-            console.log(successful);
             expect(successful.article_id).toBe(2);
             expect(successful.author).toBe("lurker");
             expect(successful.body).toBe("test1...2");

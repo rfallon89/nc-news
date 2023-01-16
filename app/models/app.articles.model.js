@@ -54,7 +54,6 @@ exports.addComment = (username, body, article_id) => {
         });
     })
     .then(() => {
-      console.log(">>>>");
       const sql = `INSERT INTO comments
     (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
       return db.query(sql, [username, body, article_id]).then(({ rows }) => {
