@@ -3,7 +3,6 @@ const app = require("../app/app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
-const { forEach } = require("../db/data/test-data/articles");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -21,8 +20,11 @@ describe("App API, /api", () => {
           .then(({ body }) => {
             expect(body).toHaveProperty("topics");
             expect(body.topics.length).toBe(3);
-            expect(body.topics[0]).toHaveProperty("slug");
-            expect(body.topics[0]).toHaveProperty("description");
+            for (let i = 0; i < 3; i++) {
+              let topic = body.topics[i];
+              expect(typeof topic.slug).toBe("string");
+              expect(typeof topic.description).toBe("string");
+            }
           });
       });
       it("returns a status of 404 when path incorrect", () => {
@@ -44,14 +46,14 @@ describe("App API, /api", () => {
             expect(body.articles.length).toBe(12);
             for (let i = 0; i < 12; i++) {
               let article = body.articles[i];
-              expect(article).toHaveProperty("author");
-              expect(article).toHaveProperty("title");
-              expect(article).toHaveProperty("article_id");
-              expect(article).toHaveProperty("topic");
-              expect(article).toHaveProperty("created_at");
-              expect(article).toHaveProperty("votes");
-              expect(article).toHaveProperty("article_img_url");
-              expect(article).toHaveProperty("comment_count");
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
             }
           });
       });
@@ -90,16 +92,16 @@ describe("App API, /api", () => {
           .get("/api/articles/1/comments")
           .expect(200)
           .then(({ body }) => {
-            expect(body).toHaveProperty("article_id1 comments");
-            expect(body["article_id1 comments"].length).toBe(11);
+            expect(body).toHaveProperty("comments");
+            expect(body.comments.length).toBe(11);
             for (let i = 0; i < 11; i++) {
-              let comment = body["article_id1 comments"][i];
-              expect(comment).toHaveProperty("comment_id");
-              expect(comment).toHaveProperty("votes");
-              expect(comment).toHaveProperty("created_at");
-              expect(comment).toHaveProperty("author");
-              expect(comment).toHaveProperty("body");
-              expect(comment).toHaveProperty("article_id");
+              let comment = body.comments[i];
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
             }
           });
       });
@@ -109,7 +111,7 @@ describe("App API, /api", () => {
           .expect(200)
           .then(({ body }) => {
             const commentDateArr = [];
-            body["article_id1 comments"].forEach((comment) =>
+            body.comments.forEach((comment) =>
               commentDateArr.push(comment.created_at)
             );
             expect(commentDateArr).toEqual([
