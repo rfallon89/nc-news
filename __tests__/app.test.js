@@ -69,7 +69,7 @@ describe("App API, /api", () => {
           });
       });
     });
-    describe.only("GET request with article_id parametric endpoint", () => {
+    describe("GET request with article_id parametric endpoint", () => {
       it("returns a status of 200 when successfully reached", () => {
         return request(app).get("/api/articles/1").expect(200);
       });
@@ -109,6 +109,33 @@ describe("App API, /api", () => {
             expect(body).toEqual({ message: "Bad Request" });
           });
       });
+    });
+    describe.only("POST request with article_id parametric endpoint to add a comment about an article", () => {});
+    it("returns a status of 200 with a message of confirmation", () => {
+      return request(app)
+        .post("/api/articles/2/comments")
+        .send({ username: "lurker", body: "test1...2" })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toEqual({
+            successful: {
+              article_id: 2,
+              author: "lurker",
+              body: "test1...2",
+              comment_id: 19,
+              votes: 0,
+            },
+          });
+        });
+    });
+    it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(400)
+        .send({ username: "nox" })
+        .then(({ body }) => {
+          expect(body).toEqual({ message: "Bad Request" });
+        });
     });
   });
 });
