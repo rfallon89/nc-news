@@ -9,3 +9,16 @@ exports.fetchArticles = () => {
   ORDER BY articles.created_at DESC`;
   return db.query(sql).then((result) => result.rows);
 };
+
+exports.fetchArticleComments = (article_id) => {
+  const sql = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
+  return db.query(sql, [+article_id]).then(({ rows }) => {
+    if (!rows[0]) {
+      return Promise.reject({
+        status: "404",
+        msg: "No comments for this article ID",
+      });
+    }
+    return rows;
+  });
+};
