@@ -110,32 +110,60 @@ describe("App API, /api", () => {
           });
       });
     });
-    describe.only("POST request with article_id parametric endpoint to add a comment about an article", () => {});
-    it("returns a status of 200 with a message of confirmation", () => {
-      return request(app)
-        .post("/api/articles/2/comments")
-        .send({ username: "lurker", body: "test1...2" })
-        .expect(200)
-        .then(({ body }) => {
-          expect(body).toEqual({
-            successful: {
-              article_id: 2,
-              author: "lurker",
-              body: "test1...2",
-              comment_id: 19,
-              votes: 0,
-            },
+    describe("POST request with article_id parametric endpoint to add a comment about an article", () => {
+      it("returns a status of 200 with a message of confirmation", () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({ username: "lurker", body: "test1...2" })
+          .expect(200)
+          .then(({ body: { successful } }) => {
+            console.log(successful);
+            expect(successful.article_id).toBe(2);
+            expect(successful.author).toBe("lurker");
+            expect(successful.body).toBe("test1...2");
+            expect(successful.comment_id).toBe(19);
+            expect(successful.votes).toBe(0);
+            expect(typeof successful.created_at).toBe("string");
           });
-        });
-    });
-    it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
-      return request(app)
-        .get("/api/articles/2/comments")
-        .expect(400)
-        .send({ username: "nox" })
-        .then(({ body }) => {
-          expect(body).toEqual({ message: "Bad Request" });
-        });
+      });
+      it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({ body: "lurker" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 400 when the article id is of the wrong data type", () => {
+        return request(app)
+          .post("/api/articles/add/comments")
+          .send({ username: "lurker", body: "test1...2" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 404 when the article id does not exist", () => {
+        return request(app)
+          .post("/api/articles/999/comments")
+          .send({ username: "nox", body: "test1...2" })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Article ID does not exist" });
+          });
+      });
+      it("returns a status of 400 when the username does not exist", () => {
+        return request(app)
+          .post("/api/articles/2/comments")
+          .send({ username: "nox", body: "test1...2" })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({
+              message: "Username does not exist, create a user profile first",
+            });
+          });
+      });
     });
   });
 });

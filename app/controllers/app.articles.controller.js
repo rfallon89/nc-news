@@ -19,10 +19,9 @@ exports.getArticle = (req, res, next) => {
 };
 
 exports.postArticleComments = (req, res, next) => {
-  const comment = Object.values(req.body);
+  const { username, body } = req.body;
   const { article_id } = req.params;
-  comment.push(article_id);
-  addComment(comment)
+  addComment(username, body, article_id)
     .then((comment) => {
       res.status(200).send({ successful: comment });
     })

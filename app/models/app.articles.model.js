@@ -12,7 +12,7 @@ exports.fetchArticles = () => {
 
 exports.fetchArticle = ({ article_id }) => {
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [+article_id])
+    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
     .then(({ rows }) => {
       const article = rows[0];
       if (!article) {
@@ -25,10 +25,40 @@ exports.fetchArticle = ({ article_id }) => {
     });
 };
 
-exports.addComment = (comment) => {
-  const sql = `INSERT INTO comments
-  (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
-  return db.query(sql, comment).then((result) => {
-    return result.rows[0];
-  });
+exports.addComment = (username, body, article_id) => {
+  if (!username || !body) {
+    return Promise.reject({ status: 400, msg: "Bad Request" });
+  }
+  return db
+    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+    .then(({ rows }) => {
+      if (!rows[0]) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article ID does not exist",
+        });
+      }
+      return;
+    })
+    .then(() => {
+      return db
+        .query(`SELECT * FROM users WHERE username = $1`, [username])
+        .then(({ rows }) => {
+          if (!rows[0]) {
+            return Promise.reject({
+              status: 404,
+              msg: "Username does not exist, create a user profile first",
+            });
+          }
+          return;
+        });
+    })
+    .then(() => {
+      console.log(">>>>");
+      const sql = `INSERT INTO comments
+    (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
+      return db.query(sql, [username, body, article_id]).then(({ rows }) => {
+        return rows[0];
+      });
+    });
 };
