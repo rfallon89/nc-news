@@ -24,6 +24,9 @@ describe("App API, /api", () => {
             expect(body.topics[0]).toHaveProperty("description");
           });
       });
+      it("returns a status of 404 when path incorrect", () => {
+        return request(app).get("/api/traa").expect(404);
+      });
     });
   });
 });
