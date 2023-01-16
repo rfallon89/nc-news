@@ -39,7 +39,6 @@ describe("App API, /api", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body }) => {
-            console.log(body);
             expect(body).toHaveProperty("articles");
             expect(body.articles.length).toBe(12);
             expect(body.articles[0]).toHaveProperty("author");
