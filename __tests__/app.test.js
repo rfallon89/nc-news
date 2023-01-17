@@ -3,7 +3,6 @@ const app = require("../app/app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
-const { get } = require("../app/app");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -227,7 +226,7 @@ describe("App API, /api", () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({ username: "lurker", body: "test1...2" })
-          .expect(200)
+          .expect(201)
           .then(({ body: { successful } }) => {
             expect(successful.article_id).toBe(2);
             expect(successful.author).toBe("lurker");
@@ -264,7 +263,7 @@ describe("App API, /api", () => {
             expect(body).toEqual({ message: "Article ID does not exist" });
           });
       });
-      it("returns a status of 400 when the username does not exist", () => {
+      it("returns a status of 404 when the username does not exist", () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({ username: "nox", body: "test1...2" })
