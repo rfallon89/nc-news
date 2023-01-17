@@ -62,24 +62,75 @@ describe("App API, /api", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            const articleDateArr = [];
-            articles.forEach((article) =>
-              articleDateArr.push(article.created_at)
-            );
-            expect(articleDateArr).toEqual([
-              "2020-11-03T09:12:00.000Z",
-              "2020-10-18T01:00:00.000Z",
-              "2020-10-16T05:03:00.000Z",
-              "2020-10-11T11:24:00.000Z",
-              "2020-08-03T13:14:00.000Z",
-              "2020-07-09T20:11:00.000Z",
-              "2020-06-06T09:10:00.000Z",
-              "2020-05-14T04:15:00.000Z",
-              "2020-05-06T01:14:00.000Z",
-              "2020-04-17T01:08:00.000Z",
-              "2020-01-15T22:21:00.000Z",
-              "2020-01-07T14:08:00.000Z",
-            ]);
+            expect(articles).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+    });
+    describe("GET request with queries", () => {
+      it("accepts a query to filter by topic value, if no query then returns all articles by default responding with a status 200", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(11);
+            articles.forEach((article) => {
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
+            });
+          });
+      });
+      it("returns a empty object if the topic exists but no articles are associated with it", () => {
+        return request(app)
+          .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toEqual([]);
+          });
+      });
+      it("returns a status for 404 if the topic value is of the correct data type but does not exist", () => {
+        return request(app)
+          .get("/api/articles?topic=rock")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "topic does not exist" });
+          });
+      });
+      it("returns the response object in date order ascending when specificed", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at");
+          });
+      });
+      it("returns the response object sorted by a specificed table column", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article_id&order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("article_id");
+          });
+      });
+      it("returns a status of 400 if sort by value does not exist in the articles table", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article&order=asc")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid Query" });
+          });
+      });
+      it("returns a status of 400 if order value is not ascending or descending", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article&order=as")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid Query" });
           });
       });
     });
