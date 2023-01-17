@@ -172,7 +172,7 @@ describe("App API, /api", () => {
           });
       });
     });
-    describe.only("PATCH request for votes update by article id", () => {
+    describe("PATCH request for votes update by article id", () => {
       it("returns a status of 200 and responses with the updated article", () => {
         return request(app)
           .patch("/api/articles/1")
@@ -194,15 +194,33 @@ describe("App API, /api", () => {
             });
           });
       });
-      // it("returns a status of 404 when article id is of correct data type but does not exist", () => {
-      //   return request(app)
-      //     .patch("/api/articles/999")
-      //     .send({ inc_votes: 10 })
-      //     .expect(404)
-      //     .then(({ body }) => {
-      //       expect(body).toEqual({ message: "article id does not exist" });
-      //     });
-      // });
+      it("returns a status of 404 when article id is of correct data type but does not exist", () => {
+        return request(app)
+          .patch("/api/articles/999")
+          .send({ inc_votes: 10 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "article id does not exist" });
+          });
+      });
+      it("returns a status of 400 when article id is of incorrect data type", () => {
+        return request(app)
+          .patch("/api/articles/votes")
+          .send({ inc_votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 400 when body recieved is incorrect", () => {
+        return request(app)
+          .patch("/api/articles/votes")
+          .send({ votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
     });
   });
   describe("API endpoint comments", () => {

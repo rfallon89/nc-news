@@ -22,7 +22,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  console.log(err);
+  console.log(err, ">>>>>>");
   res.status(500).send({ message: "Internal Server Error" });
 });
 
