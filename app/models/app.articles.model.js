@@ -71,7 +71,7 @@ exports.fetchArticleComments = (article_id) => {
   return db.query(sql, [+article_id]).then(({ rows }) => {
     if (!rows[0]) {
       return Promise.reject({
-        status: "404",
+        status: 404,
         msg: "No comments for this article ID",
       });
     }
