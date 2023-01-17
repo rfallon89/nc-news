@@ -363,7 +363,7 @@ describe("App API, /api", () => {
       it("returns a status of 404 when the article id does not exist", () => {
         return request(app)
           .post("/api/articles/999/comments")
-          .send({ username: "nox", body: "test1...2" })
+          .send({ username: "lurker", body: "test1...2" })
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({ message: "Article ID does not exist" });
