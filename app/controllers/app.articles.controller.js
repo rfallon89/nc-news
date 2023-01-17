@@ -5,11 +5,13 @@ const {
 } = require("../models/app.articles.model");
 
 exports.getArticles = (req, res, next) => {
-  fetchArticles(req.query, next).then((articles) => {
-    if (articles) {
-      res.status(200).send({ articles });
-    }
-  });
+  fetchArticles(req.query, next)
+    .then((articles) => {
+      if (articles) {
+        res.status(200).send({ articles });
+      }
+    })
+    .catch(next);
 };
 
 exports.getArticle = (req, res, next) => {
