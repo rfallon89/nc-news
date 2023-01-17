@@ -3,7 +3,6 @@ const app = require("../app/app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
-const { forEach } = require("../db/data/test-data/articles");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -21,8 +20,11 @@ describe("App API, /api", () => {
           .then(({ body }) => {
             expect(body).toHaveProperty("topics");
             expect(body.topics.length).toBe(3);
-            expect(body.topics[0]).toHaveProperty("slug");
-            expect(body.topics[0]).toHaveProperty("description");
+            for (let i = 0; i < 3; i++) {
+              let topic = body.topics[i];
+              expect(typeof topic.slug).toBe("string");
+              expect(typeof topic.description).toBe("string");
+            }
           });
       });
       it("returns a status of 404 when path incorrect", () => {
@@ -44,14 +46,14 @@ describe("App API, /api", () => {
             expect(body.articles.length).toBe(12);
             for (let i = 0; i < 12; i++) {
               let article = body.articles[i];
-              expect(article).toHaveProperty("author");
-              expect(article).toHaveProperty("title");
-              expect(article).toHaveProperty("article_id");
-              expect(article).toHaveProperty("topic");
-              expect(article).toHaveProperty("created_at");
-              expect(article).toHaveProperty("votes");
-              expect(article).toHaveProperty("article_img_url");
-              expect(article).toHaveProperty("comment_count");
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
             }
           });
       });
@@ -64,8 +66,20 @@ describe("App API, /api", () => {
             articles.forEach((article) =>
               articleDateArr.push(article.created_at)
             );
-            const sortedDateArr = [...articleDateArr].sort((a, b) => b - a);
-            expect(articleDateArr).toEqual(sortedDateArr);
+            expect(articleDateArr).toEqual([
+              "2020-11-03T09:12:00.000Z",
+              "2020-10-18T01:00:00.000Z",
+              "2020-10-16T05:03:00.000Z",
+              "2020-10-11T11:24:00.000Z",
+              "2020-08-03T13:14:00.000Z",
+              "2020-07-09T20:11:00.000Z",
+              "2020-06-06T09:10:00.000Z",
+              "2020-05-14T04:15:00.000Z",
+              "2020-05-06T01:14:00.000Z",
+              "2020-04-17T01:08:00.000Z",
+              "2020-01-15T22:21:00.000Z",
+              "2020-01-07T14:08:00.000Z",
+            ]);
           });
       });
     });
@@ -107,6 +121,53 @@ describe("App API, /api", () => {
           .expect(400)
           .then(({ body }) => {
             expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+    });
+    describe("GET request for comment by article id", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/articles/1/comments").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).toHaveProperty("comments");
+            expect(body.comments.length).toBe(11);
+            for (let i = 0; i < 11; i++) {
+              let comment = body.comments[i];
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            }
+          });
+      });
+      it("returns a json object with the relevant information sorted by date in descending order", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body }) => {
+            const commentDateArr = [];
+            body.comments.forEach((comment) =>
+              commentDateArr.push(comment.created_at)
+            );
+            expect(commentDateArr).toEqual([
+              "2020-11-03T21:00:00.000Z",
+              "2020-10-31T03:03:00.000Z",
+              "2020-07-21T00:20:00.000Z",
+              "2020-06-15T10:25:00.000Z",
+              "2020-05-15T20:19:00.000Z",
+              "2020-04-14T20:19:00.000Z",
+              "2020-04-11T21:02:00.000Z",
+              "2020-03-02T07:10:00.000Z",
+              "2020-03-01T01:13:00.000Z",
+              "2020-02-23T12:01:00.000Z",
+              "2020-01-01T03:08:00.000Z",
+            ]);
           });
       });
     });
@@ -161,6 +222,29 @@ describe("App API, /api", () => {
             expect(body).toEqual({
               message: "Username does not exist, create a user profile first",
             });
+          });
+      });
+    });
+  });
+  describe("API endpoint comments", () => {
+    describe("DELETE request", () => {
+      it("returns a status of 204 when successfully deleted", () => {
+        return request(app).delete("/api/comments/1").expect(204);
+      });
+      it("returns a status of 404 when id not found with a message ", () => {
+        return request(app)
+          .delete("/api/comments/999")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Comment ID does not exist" });
+          });
+      });
+      it("returns a status of 400 when parameter is of invalid data type with a message", () => {
+        return request(app)
+          .delete("/api/comments/delete")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
           });
       });
     });
