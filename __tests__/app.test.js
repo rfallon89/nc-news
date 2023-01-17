@@ -103,6 +103,7 @@ describe("App API, /api", () => {
                 title: "Living in the shadow of a great man",
                 topic: "mitch",
                 votes: 100,
+                comment_count: 11,
               },
             });
           });
