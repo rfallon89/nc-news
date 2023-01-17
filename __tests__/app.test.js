@@ -41,9 +41,11 @@ describe("App API, /api", () => {
           .then(({ body }) => {
             expect(body).toHaveProperty("users");
             expect(body.users.length).toBe(4);
-            expect(body.users[0]).toHaveProperty("username");
-            expect(body.users[0]).toHaveProperty("name");
-            expect(body.users[0]).toHaveProperty("avatar_url");
+            body.users.forEach((user) => {
+              expect(typeof user.username).toBe("string");
+              expect(typeof user.name).toBe("string");
+              expect(typeof user.avatar_url).toBe("string");
+            });
           });
       });
     });
