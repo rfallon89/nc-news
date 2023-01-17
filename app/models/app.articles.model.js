@@ -1,5 +1,6 @@
 const db = require("../../db/connection");
 const { fetchUsersByUsername } = require("./app.users.model");
+
 exports.fetchArticles = () => {
   const sql = `SELECT articles.article_id, articles.author, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count
   FROM articles
@@ -46,10 +47,21 @@ exports.fetchArticleComments = (article_id) => {
   });
 };
 
+exports.updateArticle = ({ article_id }, { inc_votes }) => {
+  const sql = `UPDATE articles SET votes = votes+$2 WHERE article_id = $1 RETURNING *`;
+  return db.query(sql, [article_id, inc_votes]).then(({ rows }) => {
+    if (!rows[0]) {
+      return Promise.reject({ status: 404, msg: "article id does not exist" });
+    }
+    return rows[0];
+  });
+};
+
 exports.addComment = (username, body, article_id) => {
   if (!username || !body) {
     return Promise.reject({ status: 400, msg: "Bad Request" });
   }
+
   return Promise.all([
     exports.fetchArticle({ article_id }),
     fetchUsersByUsername(username),
