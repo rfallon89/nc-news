@@ -3,6 +3,7 @@ const app = require("../app/app");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data");
+const { get } = require("../app/app");
 
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
@@ -168,6 +169,56 @@ describe("App API, /api", () => {
               "2020-02-23T12:01:00.000Z",
               "2020-01-01T03:08:00.000Z",
             ]);
+          });
+      });
+    });
+    describe("PATCH request for votes update by article id", () => {
+      it("returns a status of 200 and responses with the updated article", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 10 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).toEqual({
+              update: {
+                article_id: 1,
+                article_img_url:
+                  "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: "2020-07-09T20:11:00.000Z",
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                votes: 110,
+              },
+            });
+          });
+      });
+      it("returns a status of 404 when article id is of correct data type but does not exist", () => {
+        return request(app)
+          .patch("/api/articles/999")
+          .send({ inc_votes: 10 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "article id does not exist" });
+          });
+      });
+      it("returns a status of 400 when article id is of incorrect data type", () => {
+        return request(app)
+          .patch("/api/articles/votes")
+          .send({ inc_votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 400 when body recieved is incorrect", () => {
+        return request(app)
+          .patch("/api/articles/votes")
+          .send({ votes: 10 })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
           });
       });
     });
