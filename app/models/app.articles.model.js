@@ -10,6 +10,21 @@ exports.fetchArticles = () => {
   return db.query(sql).then((result) => result.rows);
 };
 
+exports.fetchArticle = ({ article_id }) => {
+  return db
+    .query(`SELECT * FROM articles WHERE article_id = $1`, [+article_id])
+    .then(({ rows }) => {
+      const article = rows[0];
+      if (!article) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article ID does not exist",
+        });
+      }
+      return article;
+    });
+};
+
 exports.fetchArticleComments = (article_id) => {
   const sql = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
   return db.query(sql, [+article_id]).then(({ rows }) => {
