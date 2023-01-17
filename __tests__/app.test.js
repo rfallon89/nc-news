@@ -7,7 +7,7 @@ const testData = require("../db/data/test-data");
 afterAll(() => db.end());
 beforeEach(() => seed(testData));
 
-describe("App API, /api", () => {
+describe("App API", () => {
   describe("API endpoint topics", () => {
     describe("GET request", () => {
       it("returns a status of 200 when successfully reached", () => {
@@ -323,6 +323,25 @@ describe("App API, /api", () => {
             });
           });
       });
+    });
+  });
+  describe("API endpoint", () => {
+    it("should response to a get request with a status of 200 and a JSON of the available endpoints of this API", () => {
+      return request(app)
+        .get("/api")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body).toEqual({
+            endpoints: {
+              "get(/articles)": ["/:article_id", "/:article_id/comments"],
+              "patch(/articles)": ["/:article_id"],
+              "post(/articles)": ["/:article_id/comments"],
+              "delete(/comments)": ["/:comment_id"],
+              "get(/topics)": [],
+              "get)/users)": [],
+            },
+          });
+        });
     });
   });
 });
