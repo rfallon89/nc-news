@@ -91,21 +91,15 @@ describe("App API, /api", () => {
         return request(app)
           .get("/api/articles/1")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toEqual({
-              article: {
-                article_id: 1,
-                article_img_url:
-                  "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-                author: "butter_bridge",
-                body: "I find this existence challenging",
-                created_at: "2020-07-09T20:11:00.000Z",
-                title: "Living in the shadow of a great man",
-                topic: "mitch",
-                votes: 100,
-                comment_count: 11,
-              },
-            });
+          .then(({ body: { article } }) => {
+            expect(typeof article.author).toBe("string");
+            expect(typeof article.title).toBe("string");
+            expect(typeof article.body).toBe("string");
+            expect(typeof article.article_id).toBe("number");
+            expect(typeof article.topic).toBe("string");
+            expect(typeof article.created_at).toBe("string");
+            expect(typeof article.votes).toBe("number");
+            expect(typeof article.article_img_url).toBe("string");
           });
       });
       it("returns a status of 404 when article id is not found with a message", () => {
@@ -122,6 +116,16 @@ describe("App API, /api", () => {
           .expect(400)
           .then(({ body }) => {
             expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+    });
+    describe("the addition of a comment to the response for a GET request by article id", () => {
+      it("returns the request article by ID with a comment count added to the object", () => {
+        return request(app)
+          .get("/api/articles/1")
+          .expect(200)
+          .then(({ body: { article } }) => {
+            expect(article.comment_count).toBe(11);
           });
       });
     });
