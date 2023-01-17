@@ -1,5 +1,5 @@
 const db = require("../../db/connection");
-
+const { fetchUsersByUsername } = require("./app.users.model");
 exports.fetchArticles = () => {
   const sql = `SELECT articles.article_id, articles.author, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count
   FROM articles
@@ -42,35 +42,15 @@ exports.addComment = (username, body, article_id) => {
   if (!username || !body) {
     return Promise.reject({ status: 400, msg: "Bad Request" });
   }
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
-    .then(({ rows }) => {
-      if (!rows[0]) {
-        return Promise.reject({
-          status: 404,
-          msg: "Article ID does not exist",
-        });
-      }
-      return;
-    })
-    .then(() => {
-      return db
-        .query(`SELECT * FROM users WHERE username = $1`, [username])
-        .then(({ rows }) => {
-          if (!rows[0]) {
-            return Promise.reject({
-              status: 404,
-              msg: "Username does not exist, create a user profile first",
-            });
-          }
-          return;
-        });
-    })
-    .then(() => {
-      const sql = `INSERT INTO comments
+
+  return Promise.all([
+    exports.fetchArticle({ article_id }),
+    fetchUsersByUsername(username),
+  ]).then(() => {
+    const sql = `INSERT INTO comments
     (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
-      return db.query(sql, [username, body, article_id]).then(({ rows }) => {
-        return rows[0];
-      });
+    return db.query(sql, [username, body, article_id]).then(({ rows }) => {
+      return rows[0];
     });
+  });
 };
