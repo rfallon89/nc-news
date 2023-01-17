@@ -26,6 +26,9 @@ exports.fetchArticleComments = (article_id) => {
 exports.updateArticle = ({ article_id }, { inc_votes }) => {
   const sql = `UPDATE articles SET votes = votes+$2 WHERE article_id = $1 RETURNING *`;
   return db.query(sql, [article_id, inc_votes]).then(({ rows }) => {
+    if (!rows[0]) {
+      return Promise.reject({});
+    }
     return rows[0];
   });
 };
