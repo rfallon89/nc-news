@@ -22,3 +22,10 @@ exports.fetchArticleComments = (article_id) => {
     return rows;
   });
 };
+
+exports.updateArticle = ({ article_id }, { inc_votes }) => {
+  const sql = `UPDATE articles SET votes = votes+$2 WHERE article_id = $1 RETURNING *`;
+  return db.query(sql, [article_id, inc_votes]).then(({ rows }) => {
+    return rows[0];
+  });
+};

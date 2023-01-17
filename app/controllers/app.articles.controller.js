@@ -1,6 +1,7 @@
 const {
   fetchArticles,
   fetchArticleComments,
+  updateArticle,
 } = require("../models/app.articles.model");
 
 exports.getArticles = (req, res, next) => {
@@ -14,6 +15,14 @@ exports.getArticleComments = (req, res, next) => {
   fetchArticleComments(article_id)
     .then((comments) => {
       res.status(200).send({ comments });
+    })
+    .catch(next);
+};
+
+exports.patchArticle = (req, res, next) => {
+  updateArticle(req.params, req.body)
+    .then((update) => {
+      res.status(200).send({ update });
     })
     .catch(next);
 };
