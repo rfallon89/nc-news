@@ -246,4 +246,25 @@ describe("App API, /api", () => {
       });
     });
   });
+  describe("API endpoint users", () => {
+    describe("GET request", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/users").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body).toHaveProperty("users");
+            expect(body.users.length).toBe(4);
+            body.users.forEach((user) => {
+              expect(typeof user.username).toBe("string");
+              expect(typeof user.name).toBe("string");
+              expect(typeof user.avatar_url).toBe("string");
+            });
+          });
+      });
+    });
+  });
 });
