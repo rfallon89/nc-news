@@ -369,4 +369,14 @@ describe("App API, /api", () => {
       });
     });
   });
+  describe("API responds with a path not found if the endpoint does not exist yet", () => {
+    it("returns a status of 404 and a message of path not found", () => {
+      return request(app)
+        .get("/api/headlines")
+        .expect(404)
+        .then(({ body: { message } }) =>
+          expect(message).toBe("Path Not Found")
+        );
+    });
+  });
 });
