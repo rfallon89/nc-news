@@ -7,10 +7,10 @@ exports.fetchTopics = (topic) => {
     sql += ` WHERE slug= $1`;
     queryArr.push(topic);
   }
-  return db.query(sql, queryArr).then(({ rows }) => {
-    if (!rows[0]) {
+  return db.query(sql, queryArr).then(({ rows: topics }) => {
+    if (!topics[0]) {
       return Promise.reject({ status: 404, msg: "topic does not exist" });
     }
-    return rows;
+    return topics;
   });
 };

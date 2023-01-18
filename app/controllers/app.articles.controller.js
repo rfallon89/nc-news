@@ -19,7 +19,7 @@ exports.getArticles = (req, res, next) => {
 exports.getArticle = (req, res, next) => {
   fetchArticle(req.params)
     .then((article) => {
-      res.status(200).send({ article: article });
+      res.status(200).send({ article });
     })
     .catch(next);
 };
