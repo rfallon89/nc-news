@@ -17,18 +17,13 @@ describe("App API", () => {
         return request(app)
           .get("/api/topics")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toHaveProperty("topics");
-            expect(body.topics.length).toBe(3);
-            for (let i = 0; i < 3; i++) {
-              let topic = body.topics[i];
+          .then(({ body: { topics } }) => {
+            expect(topics.length).toBe(3);
+            topics.forEach((topic) => {
               expect(typeof topic.slug).toBe("string");
               expect(typeof topic.description).toBe("string");
-            }
+            });
           });
-      });
-      it("returns a status of 404 when path incorrect", () => {
-        return request(app).get("/api/traa").expect(404);
       });
     });
   });
@@ -41,20 +36,19 @@ describe("App API", () => {
         return request(app)
           .get("/api/articles")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toHaveProperty("articles");
-            expect(body.articles.length).toBe(12);
-            for (let i = 0; i < 12; i++) {
-              let article = body.articles[i];
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(12);
+            articles.forEach((article) => {
               expect(typeof article.author).toBe("string");
               expect(typeof article.title).toBe("string");
+              expect(typeof article.body).toBe("string");
               expect(typeof article.article_id).toBe("number");
               expect(typeof article.topic).toBe("string");
               expect(typeof article.created_at).toBe("string");
               expect(typeof article.votes).toBe("number");
               expect(typeof article.article_img_url).toBe("string");
               expect(typeof article.comment_count).toBe("number");
-            }
+            });
           });
       });
       it("returns a json object with the relevant information sorted by date in descending order", () => {
@@ -62,24 +56,76 @@ describe("App API", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            const articleDateArr = [];
-            articles.forEach((article) =>
-              articleDateArr.push(article.created_at)
-            );
-            expect(articleDateArr).toEqual([
-              "2020-11-03T09:12:00.000Z",
-              "2020-10-18T01:00:00.000Z",
-              "2020-10-16T05:03:00.000Z",
-              "2020-10-11T11:24:00.000Z",
-              "2020-08-03T13:14:00.000Z",
-              "2020-07-09T20:11:00.000Z",
-              "2020-06-06T09:10:00.000Z",
-              "2020-05-14T04:15:00.000Z",
-              "2020-05-06T01:14:00.000Z",
-              "2020-04-17T01:08:00.000Z",
-              "2020-01-15T22:21:00.000Z",
-              "2020-01-07T14:08:00.000Z",
-            ]);
+            expect(articles).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+    });
+    describe("GET request with queries", () => {
+      it("accepts a query to filter by topic value, if no query then returns all articles by default responding with a status 200", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(11);
+            articles.forEach((article) => {
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.body).toBe("string");
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
+            });
+          });
+      });
+      it("returns a empty object if the topic exists but no articles are associated with it", () => {
+        return request(app)
+          .get("/api/articles?topic=paper")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toEqual([]);
+          });
+      });
+      it("returns a status for 404 if the topic value is of the correct data type but does not exist", () => {
+        return request(app)
+          .get("/api/articles?topic=rock")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "topic does not exist" });
+          });
+      });
+      it("returns the response object in date order ascending when specificed", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("created_at");
+          });
+      });
+      it("returns the response object sorted by a specificed table column", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article_id&order=asc")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles).toBeSortedBy("article_id");
+          });
+      });
+      it("returns a status of 400 if sort by value does not exist in the articles table", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article&order=asc")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid Query" });
+          });
+      });
+      it("returns a status of 400 if order value is not ascending or descending", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch&sort_by=article&order=as")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Invalid Query" });
           });
       });
     });
@@ -137,42 +183,42 @@ describe("App API", () => {
         return request(app)
           .get("/api/articles/1/comments")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toHaveProperty("comments");
-            expect(body.comments.length).toBe(11);
-            for (let i = 0; i < 11; i++) {
-              let comment = body.comments[i];
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(11);
+            comments.forEach((comment) => {
               expect(typeof comment.comment_id).toBe("number");
               expect(typeof comment.votes).toBe("number");
               expect(typeof comment.created_at).toBe("string");
               expect(typeof comment.author).toBe("string");
               expect(typeof comment.body).toBe("string");
               expect(comment.article_id).toBe(1);
-            }
+            });
           });
       });
       it("returns a json object with the relevant information sorted by date in descending order", () => {
         return request(app)
           .get("/api/articles/1/comments")
           .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toBeSortedBy("created_at", { descending: true });
+          });
+      });
+      it("returns 400 if article id is wrong data type", () => {
+        return request(app)
+          .get("/api/articles/one/comments")
+          .expect(400)
           .then(({ body }) => {
-            const commentDateArr = [];
-            body.comments.forEach((comment) =>
-              commentDateArr.push(comment.created_at)
-            );
-            expect(commentDateArr).toEqual([
-              "2020-11-03T21:00:00.000Z",
-              "2020-10-31T03:03:00.000Z",
-              "2020-07-21T00:20:00.000Z",
-              "2020-06-15T10:25:00.000Z",
-              "2020-05-15T20:19:00.000Z",
-              "2020-04-14T20:19:00.000Z",
-              "2020-04-11T21:02:00.000Z",
-              "2020-03-02T07:10:00.000Z",
-              "2020-03-01T01:13:00.000Z",
-              "2020-02-23T12:01:00.000Z",
-              "2020-01-01T03:08:00.000Z",
-            ]);
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns 404 if article id is correct data type but does not exist", () => {
+        return request(app)
+          .get("/api/articles/999/comments")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({
+              message: "No comments for this article ID",
+            });
           });
       });
     });
@@ -448,6 +494,16 @@ describe("App API", () => {
             },
           });
         });
+    });
+  });
+  describe("API responds with a path not found if the endpoint does not exist yet", () => {
+    it("returns a status of 404 and a message of path not found", () => {
+      return request(app)
+        .get("/api/headlines")
+        .expect(404)
+        .then(({ body: { message } }) =>
+          expect(message).toBe("Path Not Found")
+        );
     });
   });
 });
