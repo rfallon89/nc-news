@@ -96,7 +96,7 @@ exports.addComment = (username, body, article_id) => {
 
   return Promise.all([
     exports.fetchArticle({ article_id }),
-    fetchUsersByUsername(username),
+    fetchUsersByUsername({ username }),
   ]).then(() => {
     const sql = `INSERT INTO comments
     (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
