@@ -3,7 +3,7 @@ const { fetchUsersByUsername } = require("./app.users.model");
 const { fetchTopics } = require("./app.topics.model");
 
 exports.fetchArticles = (
-  { topic, sort_by = "created_at", order = "desc" },
+  { topic, sort_by = "created_at", order = "desc", limit = 10, p = 1 },
   next
 ) => {
   const queryValues = [];
@@ -32,8 +32,15 @@ exports.fetchArticles = (
     queryValues.push(topic);
     sql += ` WHERE topic = $1`;
   }
+
+  queryValues.push(+limit);
   sql += ` GROUP BY articles.article_id
-          ORDER BY ${sort_by} ${order}`;
+          ORDER BY ${sort_by} ${order}
+          LIMIT $${queryValues.length}`;
+
+  queryValues.push((+p - 1) * limit);
+  sql += ` OFFSET $${queryValues.length}`;
+
   const sqlQuery = (queryValues) => {
     return db.query(sql, queryValues);
   };
