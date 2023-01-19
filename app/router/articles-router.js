@@ -1,5 +1,4 @@
 const articlesRouter = require("express").Router();
-const articles = require("../../db/data/test-data/articles");
 const {
   getArticles,
   getArticle,

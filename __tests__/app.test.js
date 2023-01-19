@@ -26,6 +26,46 @@ describe("App API", () => {
           });
       });
     });
+    describe("POST request", () => {
+      it("returns a status of 201 with a message of confirmation", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ slug: "topic name here", description: "description here" })
+          .expect(201)
+          .then(({ body: { topic } }) => {
+            expect(topic.slug).toBe("topic name here");
+            expect(topic.description).toBe("description here");
+          });
+      });
+      it("returns a status of 201 with a message of confirmation when no description given", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ slug: "topic name here" })
+          .expect(201)
+          .then(({ body: { topic } }) => {
+            expect(topic.slug).toBe("topic name here");
+            expect(topic.description).toBe(null);
+          });
+      });
+      it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ body: "lurker" })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toEqual("Bad Request");
+          });
+      });
+      it("returns a status of 400 when the slug already exists", () => {
+        return request(app)
+          .post("/api/topics")
+          .send({ slug: "mitch" })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Topic slug already exists");
+          });
+      });
+    });
   });
   describe("API endpoint articles", () => {
     describe("GET request", () => {
@@ -457,18 +497,18 @@ describe("App API", () => {
       });
     });
     describe("POST request with article_id parametric endpoint to add a comment about an article", () => {
-      it("returns a status of 200 with a message of confirmation", () => {
+      it("returns a status of 201 with a message of confirmation", () => {
         return request(app)
           .post("/api/articles/2/comments")
           .send({ username: "lurker", body: "test1...2" })
           .expect(201)
-          .then(({ body: { successful } }) => {
-            expect(successful.article_id).toBe(2);
-            expect(successful.author).toBe("lurker");
-            expect(successful.body).toBe("test1...2");
-            expect(successful.comment_id).toBe(19);
-            expect(successful.votes).toBe(0);
-            expect(typeof successful.created_at).toBe("string");
+          .then(({ body: { comment } }) => {
+            expect(comment.article_id).toBe(2);
+            expect(comment.author).toBe("lurker");
+            expect(comment.body).toBe("test1...2");
+            expect(comment.comment_id).toBe(19);
+            expect(comment.votes).toBe(0);
+            expect(typeof comment.created_at).toBe("string");
           });
       });
       it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
