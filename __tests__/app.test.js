@@ -129,6 +129,72 @@ describe("App API", () => {
           });
       });
     });
+    describe("POST request to add a article", () => {
+      it("returns a status of 201 with a message of confirmation", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "lurker",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+            article_img_url: "....",
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(typeof article.article_id).toBe("number");
+            expect(article.title).toBe("post test");
+            expect(article.topic).toBe("cats");
+            expect(article.author).toBe("lurker");
+            expect(article.body).toBe("test1...2");
+            expect(article.comment_count).toBe(0);
+            expect(article.votes).toBe(0);
+            expect(typeof article.created_at).toBe("string");
+            expect(article.article_img_url).toBe("....");
+          });
+      });
+      it("returns a status of 201 with a message of confirmation if no article_img_url is provided and returns the default", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "lurker",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article.article_img_url).toBe(
+              "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+            );
+          });
+      });
+      it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({ body: "lurker" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 404 when the username id is not found", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "Nox",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+          })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe(
+              "Username does not exist, create a user profile"
+            );
+          });
+      });
+    });
     describe("GET request with article_id parametric endpoint", () => {
       it("returns a status of 200 when successfully reached", () => {
         return request(app).get("/api/articles/1").expect(200);
