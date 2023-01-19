@@ -7,7 +7,7 @@ exports.fetchArticles = (
   next
 ) => {
   const queryValues = [];
-  let sql = `SELECT articles.article_id, articles.author,articles.body, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count
+  let sql = `SELECT articles.article_id, articles.author,articles.body, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count, COUNT(*) OVER() ::INT AS total_count
   FROM articles
   LEFT OUTER JOIN comments
   ON articles.article_id = comments.article_id`;

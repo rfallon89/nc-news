@@ -210,6 +210,26 @@ describe("App API", () => {
             });
           });
       });
+      it("returns the articles now with each article having a total_count key for all articles that match the given criteria regarless of any limits set for pagination", () => {
+        return request(app)
+          .get("/api/articles?p=2&limit=5")
+          .expect(200)
+          .then(({ body: { articles } }) => {
+            expect(articles.length).toBe(5);
+            articles.forEach((article) => {
+              expect(typeof article.author).toBe("string");
+              expect(typeof article.title).toBe("string");
+              expect(typeof article.body).toBe("string");
+              expect(typeof article.article_id).toBe("number");
+              expect(typeof article.topic).toBe("string");
+              expect(typeof article.created_at).toBe("string");
+              expect(typeof article.votes).toBe("number");
+              expect(typeof article.article_img_url).toBe("string");
+              expect(typeof article.comment_count).toBe("number");
+              expect(article.total_count).toBe(12);
+            });
+          });
+      });
       it("returns an empty if page number is of invalid data type", () => {
         return request(app)
           .get("/api/articles?p=two")
