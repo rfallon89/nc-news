@@ -9,8 +9,8 @@ This project is set up to utilise a test and a development database with the env
 *+ PGDATABASE=nc_news (.env.development)
 
 
-To run this project locally you must first clone the repository using the appropriate link in the code dropdown menu for the desired method. Once cloned run `code`npm install`code` command in Node.js, this will install all the packages required to run the project. You will see inside the package.json scripts have been created to handle the set up and seeding of the database. To run these `code`npm run <name of script>`code` command in Node.js.
+To run this project locally you must first clone the repository using the appropriate link in the code dropdown menu for the desired method. Once cloned run `npm install` command in Node.js, this will install all the packages required to run the project. You will see inside the package.json scripts that have been created to handle the set up and seeding of the database. To run these use `npm run <name of script>` command in Node.js.
   
-When running the test for for the API run command `code`npm test app.test.js`code` here the seeding of the database is handled by the test file however you must ensure that the database has first been created with `code`npm run setup-dbs`code`.
+When running the tests for the API use command `npm test app.test.js`. The seeding of the database is handled by the test file however you must ensure that the database has first been created with the setup-db script `npm run setup-dbs`.
 
   
