@@ -136,3 +136,20 @@ exports.addArticle = ({ author, title, body, topic, article_img_url }) => {
         });
       });
 };
+
+exports.removeArticle = ({ article_id }) => {
+  return db
+    .query(`DELETE FROM articles WHERE article_id = $1 RETURNING *`, [
+      +article_id,
+    ])
+    .then(({ rows: [article] }) => {
+      if (!article) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article ID does not exist",
+        });
+      }
+      console.log(article);
+      return article;
+    });
+};

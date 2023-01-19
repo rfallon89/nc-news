@@ -510,6 +510,27 @@ describe("App API", () => {
           });
       });
     });
+    describe("DELETE request for article by id", () => {
+      it("returns a status of 204 when successfully deleted", () => {
+        return request(app).delete("/api/articles/1").expect(204);
+      });
+      it("returns a status of 404 when id not found with a message ", () => {
+        return request(app)
+          .delete("/api/articles/999")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Article ID does not exist" });
+          });
+      });
+      it("returns a status of 400 when parameter is of invalid data type with a message", () => {
+        return request(app)
+          .delete("/api/articles/delete")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+    });
   });
   describe("API endpoint comments", () => {
     describe("DELETE request", () => {
