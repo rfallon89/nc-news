@@ -149,7 +149,6 @@ exports.removeArticle = ({ article_id }) => {
           msg: "Article ID does not exist",
         });
       }
-      console.log(article);
       return article;
     });
 };
