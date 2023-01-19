@@ -387,7 +387,7 @@ describe("App API", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({
-              message: "Username does not exist, create a user profile first",
+              message: "Username does not exist, create a user profile",
             });
           });
       });
@@ -425,14 +425,38 @@ describe("App API", () => {
         return request(app)
           .get("/api/users")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toHaveProperty("users");
-            expect(body.users.length).toBe(4);
-            body.users.forEach((user) => {
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(4);
+            users.forEach((user) => {
               expect(typeof user.username).toBe("string");
               expect(typeof user.name).toBe("string");
               expect(typeof user.avatar_url).toBe("string");
             });
+          });
+      });
+    });
+    describe("GET request with :username parametric endpoint", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/users").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/users/butter_bridge")
+          .expect(200)
+          .then(({ body: { user } }) => {
+            expect(typeof user.username).toBe("string");
+            expect(typeof user.name).toBe("string");
+            expect(typeof user.avatar_url).toBe("string");
+          });
+      });
+      it("returns a status of 404 if username is not found", () => {
+        return request(app)
+          .get("/api/users/butter")
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe(
+              "Username does not exist, create a user profile"
+            );
           });
       });
     });
