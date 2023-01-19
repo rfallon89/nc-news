@@ -3,11 +3,11 @@ const { fetchUsersByUsername } = require("./app.users.model");
 const { fetchTopics } = require("./app.topics.model");
 
 exports.fetchArticles = (
-  { topic, sort_by = "created_at", order = "desc" },
+  { topic, sort_by = "created_at", order = "desc", limit = 10, p = 1 },
   next
 ) => {
   const queryValues = [];
-  let sql = `SELECT articles.article_id, articles.author,articles.body, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count
+  let sql = `SELECT articles.article_id, articles.author,articles.body, articles.title,articles.topic, articles.created_at,articles.votes,articles.article_img_url, COUNT(comments.comment_id)::INT AS comment_count, COUNT(*) OVER() ::INT AS total_count
   FROM articles
   LEFT OUTER JOIN comments
   ON articles.article_id = comments.article_id`;
@@ -32,8 +32,15 @@ exports.fetchArticles = (
     queryValues.push(topic);
     sql += ` WHERE topic = $1`;
   }
+
+  queryValues.push(+limit);
   sql += ` GROUP BY articles.article_id
-          ORDER BY ${sort_by} ${order}`;
+          ORDER BY ${sort_by} ${order}
+          LIMIT $${queryValues.length}`;
+
+  queryValues.push((+p - 1) * limit);
+  sql += ` OFFSET $${queryValues.length}`;
+
   const sqlQuery = (queryValues) => {
     return db.query(sql, queryValues);
   };
