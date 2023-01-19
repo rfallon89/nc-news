@@ -247,6 +247,72 @@ describe("App API", () => {
           });
       });
     });
+    describe("POST request to add a article", () => {
+      it("returns a status of 201 with a message of confirmation", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "lurker",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+            article_img_url: "....",
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(typeof article.article_id).toBe("number");
+            expect(article.title).toBe("post test");
+            expect(article.topic).toBe("cats");
+            expect(article.author).toBe("lurker");
+            expect(article.body).toBe("test1...2");
+            expect(article.comment_count).toBe(0);
+            expect(article.votes).toBe(0);
+            expect(typeof article.created_at).toBe("string");
+            expect(article.article_img_url).toBe("....");
+          });
+      });
+      it("returns a status of 201 with a message of confirmation if no article_img_url is provided and returns the default", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "lurker",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+          })
+          .expect(201)
+          .then(({ body: { article } }) => {
+            expect(article.article_img_url).toBe(
+              "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+            );
+          });
+      });
+      it("returns a status of 400 when the posted body is of the wrong format with a message", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({ body: "lurker" })
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("returns a status of 404 when the username id is not found", () => {
+        return request(app)
+          .post("/api/articles")
+          .send({
+            author: "Nox",
+            body: "test1...2",
+            title: "post test",
+            topic: "cats",
+          })
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe(
+              "Username does not exist, create a user profile"
+            );
+          });
+      });
+    });
     describe("GET request with article_id parametric endpoint", () => {
       it("returns a status of 200 when successfully reached", () => {
         return request(app).get("/api/articles/1").expect(200);
@@ -439,7 +505,7 @@ describe("App API", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({
-              message: "Username does not exist, create a user profile first",
+              message: "Username does not exist, create a user profile",
             });
           });
       });
@@ -477,14 +543,38 @@ describe("App API", () => {
         return request(app)
           .get("/api/users")
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toHaveProperty("users");
-            expect(body.users.length).toBe(4);
-            body.users.forEach((user) => {
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(4);
+            users.forEach((user) => {
               expect(typeof user.username).toBe("string");
               expect(typeof user.name).toBe("string");
               expect(typeof user.avatar_url).toBe("string");
             });
+          });
+      });
+    });
+    describe("GET request with :username parametric endpoint", () => {
+      it("returns a status of 200 when successfully reached", () => {
+        return request(app).get("/api/users").expect(200);
+      });
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/users/butter_bridge")
+          .expect(200)
+          .then(({ body: { user } }) => {
+            expect(typeof user.username).toBe("string");
+            expect(typeof user.name).toBe("string");
+            expect(typeof user.avatar_url).toBe("string");
+          });
+      });
+      it("returns a status of 404 if username is not found", () => {
+        return request(app)
+          .get("/api/users/butter")
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe(
+              "Username does not exist, create a user profile"
+            );
           });
       });
     });

@@ -103,7 +103,7 @@ exports.addComment = (username, body, article_id) => {
 
   return Promise.all([
     exports.fetchArticle({ article_id }),
-    fetchUsersByUsername(username),
+    fetchUsersByUsername({ username }),
   ]).then(() => {
     const sql = `INSERT INTO comments
     (author,body,article_id) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3) RETURNING *`;
@@ -113,4 +113,26 @@ exports.addComment = (username, body, article_id) => {
         return comment;
       });
   });
+};
+
+exports.addArticle = ({ author, title, body, topic, article_img_url }) => {
+  const values = [author, title, body, topic];
+  let username = author;
+  return values.includes(undefined)
+    ? Promise.reject({ status: 400, msg: "Bad Request" })
+    : fetchUsersByUsername({ username }).then(() => {
+        let sql = "";
+        if (!article_img_url) {
+          sql = `INSERT INTO articles
+      (author,title,body, topic) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3,$4) RETURNING *`;
+        } else {
+          values.push(article_img_url);
+          sql = `INSERT INTO articles
+    (author,title,body, topic, article_img_url) VALUES ((SELECT username FROM users WHERE username = $1),$2,$3,$4,$5) RETURNING *`;
+        }
+        return db.query(sql, values).then(({ rows: [article] }) => {
+          article.comment_count = 0;
+          return article;
+        });
+      });
 };
