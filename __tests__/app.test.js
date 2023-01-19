@@ -278,12 +278,12 @@ describe("App API", () => {
             expect(body.message).toBe("Bad Request");
           });
       });
-      it("returns an empty array if page number has no articles on it", () => {
+      it("returns a 404 not found if page does not exist", () => {
         return request(app)
           .get("/api/articles?p=99")
-          .expect(200)
-          .then(({ body: { articles } }) => {
-            expect(articles).toEqual([]);
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Page Not Found");
           });
       });
     });
@@ -408,7 +408,6 @@ describe("App API", () => {
           .get("/api/articles/1/comments")
           .expect(200)
           .then(({ body: { comments } }) => {
-            expect(comments.length).toBe(11);
             comments.forEach((comment) => {
               expect(typeof comment.comment_id).toBe("number");
               expect(typeof comment.votes).toBe("number");
@@ -443,6 +442,96 @@ describe("App API", () => {
             expect(body).toEqual({
               message: "No comments for this article ID",
             });
+          });
+      });
+    });
+    describe("GET request with QUERIES for comment by article id", () => {
+      it("returns a status of 200 and a default limit of 10 to the return when successfully reached", () => {
+        return request(app)
+          .get("/api/articles/1/comments")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(10);
+            comments.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            });
+          });
+      });
+      it("returns with a limit of specified length to the return when successfully reached", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=5")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(5);
+            comments.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            });
+          });
+      });
+      it("returns 400 if limit value is wrong data type", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=five")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+      it("accepts a p (page) query which returns the page number requested respective of the default 10 limit", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=2")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(1);
+            comments.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            });
+          });
+      });
+      it("accepts a p (page) query which returns the page number requested respective of the limit specified", () => {
+        return request(app)
+          .get("/api/articles/1/comments?limit=5&p=3")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(1);
+            comments.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            });
+          });
+      });
+      it("returns an empty if page number is of invalid data type", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=two")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body.message).toBe("Bad Request");
+          });
+      });
+      it("returns a 404 not found if page number does not exist", () => {
+        return request(app)
+          .get("/api/articles/1/comments?p=9999")
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Page Not Found");
           });
       });
     });

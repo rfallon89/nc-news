@@ -46,6 +46,12 @@ exports.fetchArticles = (
   };
   return Promise.all([sqlQuery(queryValues), fetchTopics(topic)])
     .then(([{ rows: articles }]) => {
+      if (!articles[0] & (p > 1)) {
+        return Promise.reject({
+          status: 404,
+          msg: "Page Not Found",
+        });
+      }
       return articles;
     })
     .catch(next);
@@ -73,10 +79,18 @@ exports.fetchArticle = ({ article_id }) => {
     });
 };
 
-exports.fetchArticleComments = (article_id) => {
-  const sql = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
-  return db.query(sql, [+article_id]).then(({ rows: comment }) => {
-    if (!comment[0]) {
+exports.fetchArticleComments = ({ article_id }, { limit = 10, p = 1 }) => {
+  const queryValues = [+article_id, limit];
+  let sql = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC LIMIT $2`;
+  queryValues.push((+p - 1) * limit);
+  sql += ` OFFSET $${queryValues.length}`;
+  return db.query(sql, queryValues).then(({ rows: comment }) => {
+    if (!comment[0] & (p > 1)) {
+      return Promise.reject({
+        status: 404,
+        msg: "Page Not Found",
+      });
+    } else if (!comment[0]) {
       return Promise.reject({
         status: 404,
         msg: "No comments for this article ID",
