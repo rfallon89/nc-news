@@ -190,7 +190,7 @@ describe("App API", () => {
           .expect(404)
           .then(({ body: { message } }) => {
             expect(message).toBe(
-              "Username does not exist, create a user profile first"
+              "Username does not exist, create a user profile"
             );
           });
       });

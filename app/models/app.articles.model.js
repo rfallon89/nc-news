@@ -110,9 +110,10 @@ exports.addComment = (username, body, article_id) => {
 
 exports.addArticle = ({ author, title, body, topic, article_img_url }) => {
   const values = [author, title, body, topic];
+  let username = author;
   return values.includes(undefined)
     ? Promise.reject({ status: 400, msg: "Bad Request" })
-    : fetchUsersByUsername(author).then(() => {
+    : fetchUsersByUsername({ username }).then(() => {
         let sql = "";
         if (!article_img_url) {
           sql = `INSERT INTO articles
