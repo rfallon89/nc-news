@@ -270,7 +270,7 @@ describe("App API", () => {
             });
           });
       });
-      it("returns an empty if page number is of invalid data type", () => {
+      it("returns a status of 400 if page number is of invalid data type", () => {
         return request(app)
           .get("/api/articles?p=two")
           .expect(400)
@@ -760,12 +760,85 @@ describe("App API", () => {
           .get("/api/users")
           .expect(200)
           .then(({ body: { users } }) => {
-            expect(users.length).toBe(4);
             users.forEach((user) => {
               expect(typeof user.username).toBe("string");
               expect(typeof user.name).toBe("string");
               expect(typeof user.avatar_url).toBe("string");
             });
+          });
+      });
+      it("returns the users sorted by username in ascending alphabetical order by default", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users).toBeSortedBy("username");
+          });
+      });
+      it("returns the users sorted by username in descending alphabetical order if specified", () => {
+        return request(app)
+          .get("/api/users?order=desc")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users).toBeSortedBy("username", { descending: true });
+          });
+      });
+    });
+    describe("Pagnation to the users GET request", () => {
+      it("applies a limit to the displayed articles of 10 per page if not specified", () => {
+        return request(app)
+          .get("/api/users")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(10);
+          });
+      });
+      it("applies a limit to the displayed articles of 2 per page if not specified", () => {
+        return request(app)
+          .get("/api/users?limit=5")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(5);
+          });
+      });
+      it("returns a 400 bad request of the limit value is of the wrong data type", () => {
+        return request(app)
+          .get("/api/users?limit=five")
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Bad Request");
+          });
+      });
+      it("accepts a p (page) query which returns the page number requested respective of the default 10 limit", () => {
+        return request(app)
+          .get("/api/users?p=2")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(4);
+          });
+      });
+      it("accepts a p (page) query which returns the page number requested respective of the limit specified", () => {
+        return request(app)
+          .get("/api/users?limit=5&p=2")
+          .expect(200)
+          .then(({ body: { users } }) => {
+            expect(users.length).toBe(5);
+          });
+      });
+      it("returns a status of 400 if page number is of invalid data type", () => {
+        return request(app)
+          .get("/api/users?p=two")
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Bad Request");
+          });
+      });
+      it("returns a 404 not found if page does not exist", () => {
+        return request(app)
+          .get("/api/users?p=9999")
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Page Not Found");
           });
       });
     });
