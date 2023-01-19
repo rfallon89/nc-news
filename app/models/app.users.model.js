@@ -6,7 +6,7 @@ exports.fetchUsersByUsername = ({ username }) => {
     if (!user) {
       return Promise.reject({
         status: 404,
-        msg: "Username does not exist, create a user profile",
+        msg: "Username does not exist",
       });
     }
     return user;

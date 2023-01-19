@@ -347,9 +347,7 @@ describe("App API", () => {
           })
           .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).toBe(
-              "Username does not exist, create a user profile"
-            );
+            expect(message).toBe("Username does not exist");
           });
       });
     });
@@ -440,7 +438,43 @@ describe("App API", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({
-              message: "No comments for this article ID",
+              message: "No comments",
+            });
+          });
+      });
+    });
+    describe("Query by author to GET request for comment by article id", () => {
+      it("returns a json object with the relevant information", () => {
+        return request(app)
+          .get("/api/articles/1/comments?author=butter_bridge")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments.length).toBe(2);
+            comments.forEach((comment) => {
+              expect(typeof comment.comment_id).toBe("number");
+              expect(typeof comment.votes).toBe("number");
+              expect(typeof comment.created_at).toBe("string");
+              expect(typeof comment.author).toBe("string");
+              expect(typeof comment.body).toBe("string");
+              expect(comment.article_id).toBe(1);
+            });
+          });
+      });
+      it("returns 404 if author does not exist", () => {
+        return request(app)
+          .get("/api/articles/1/comments?author=butter")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Username does not exist" });
+          });
+      });
+      it("returns 404 if no comments made by the author", () => {
+        return request(app)
+          .get("/api/articles/6/comments?author=icellusedkars")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({
+              message: "No comments",
             });
           });
       });
@@ -634,7 +668,7 @@ describe("App API", () => {
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({
-              message: "Username does not exist, create a user profile",
+              message: "Username does not exist",
             });
           });
       });
@@ -754,9 +788,7 @@ describe("App API", () => {
           .get("/api/users/butter")
           .expect(404)
           .then(({ body: { message } }) => {
-            expect(message).toBe(
-              "Username does not exist, create a user profile"
-            );
+            expect(message).toBe("Username does not exist");
           });
       });
     });

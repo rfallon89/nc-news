@@ -79,25 +79,56 @@ exports.fetchArticle = ({ article_id }) => {
     });
 };
 
-exports.fetchArticleComments = ({ article_id }, { limit = 10, p = 1 }) => {
+exports.fetchArticleComments = (
+  { article_id },
+  { limit = 10, p = 1, author }
+) => {
   const queryValues = [+article_id, limit];
-  let sql = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC LIMIT $2`;
+  let sql = `SELECT * FROM comments WHERE article_id = $1`;
+  if (author) {
+    queryValues.push(author);
+    sql += ` AND author = $3`;
+  }
+  sql += ` ORDER BY created_at DESC LIMIT $2`;
   queryValues.push((+p - 1) * limit);
   sql += ` OFFSET $${queryValues.length}`;
-  return db.query(sql, queryValues).then(({ rows: comment }) => {
-    if (!comment[0] & (p > 1)) {
-      return Promise.reject({
-        status: 404,
-        msg: "Page Not Found",
+  const query = (sql, queryValues) => {
+    return db.query(sql, queryValues);
+  };
+  if (author) {
+    let username = author;
+    return fetchUsersByUsername({ username }).then(() => {
+      return query(sql, queryValues).then(({ rows: comment }) => {
+        if (!comment[0] & (p > 1)) {
+          return Promise.reject({
+            status: 404,
+            msg: "Page Not Found",
+          });
+        } else if (!comment[0]) {
+          return Promise.reject({
+            status: 404,
+            msg: "No comments",
+          });
+        }
+        return comment;
       });
-    } else if (!comment[0]) {
-      return Promise.reject({
-        status: 404,
-        msg: "No comments for this article ID",
-      });
-    }
-    return comment;
-  });
+    });
+  } else {
+    return query(sql, queryValues).then(({ rows: comment }) => {
+      if (!comment[0] & (p > 1)) {
+        return Promise.reject({
+          status: 404,
+          msg: "Page Not Found",
+        });
+      } else if (!comment[0]) {
+        return Promise.reject({
+          status: 404,
+          msg: "No comments",
+        });
+      }
+      return comment;
+    });
+  }
 };
 
 exports.updateArticle = ({ article_id }, { inc_votes }) => {
