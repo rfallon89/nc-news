@@ -5,8 +5,8 @@ https://nc-news-api-v1ty.onrender.com
 This project is a API for a database storing information on articles, the users and comments and the associations between them. For JSON of available endpoints request https://nc-news-api-v1ty.onrender.com/api
 
 This project is set up to utilise a test and a development database with the environment variables set up with the use of .env files titled, .env.test and .env.development. These files determine which database the API establishes a connection too, you must create these with the following variables inside:
--PGDATABASE=nc_news_test (.env.test)
--PGDATABASE=nc_news (.env.development)
+- PGDATABASE=nc_news_test (.env.test)
+- PGDATABASE=nc_news (.env.development)
 
 
 To run this project locally you must first clone the repository using the appropriate link in the code dropdown menu for the desired method. Once cloned run `npm install` command in Node.js, this will install all the packages required to run the project. You will see inside the package.json scripts that have been created to handle the set up and seeding of the database. To run these use `npm run <name of script>` command in Node.js.
