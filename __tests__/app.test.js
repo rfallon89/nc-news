@@ -533,6 +533,38 @@ describe("App API", () => {
           });
       });
     });
+    describe("PATCH request for comment by comment id", () => {
+      it("returns a status of 200 when successfully updated the comment's votes", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_votes: 10 })
+          .expect(200)
+          .then(({ body: { updated_comment } }) => {
+            expect(updated_comment.comment_id).toBe(1);
+            expect(updated_comment.votes).toBe(26);
+            expect(typeof updated_comment.created_at).toBe("string");
+            expect(typeof updated_comment.author).toBe("string");
+            expect(typeof updated_comment.body).toBe("string");
+            expect(typeof updated_comment.article_id).toBe("number");
+          });
+      });
+      it("returns a status of 404 when id not found with a message ", () => {
+        return request(app)
+          .delete("/api/comments/999")
+          .expect(404)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Comment ID does not exist" });
+          });
+      });
+      it("returns a status of 400 when parameter is of invalid data type with a message", () => {
+        return request(app)
+          .delete("/api/comments/update")
+          .expect(400)
+          .then(({ body }) => {
+            expect(body).toEqual({ message: "Bad Request" });
+          });
+      });
+    });
   });
   describe("API endpoint users", () => {
     describe("GET request", () => {
