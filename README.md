@@ -14,5 +14,6 @@ To run this project locally you must first clone the repository using the approp
 When running the tests for the API, use command `npm test app.test.js`. The seeding of the database is handled by the test file, however you must ensure that the database has first been created with the setup-db script `npm run setup-dbs`.
 
 PostgresSQL v15.1 
+
 Node v18.12.1
   
