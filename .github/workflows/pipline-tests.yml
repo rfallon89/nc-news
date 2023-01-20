@@ -40,7 +40,7 @@ jobs:
       - name: Use PostgresSQL
         uses: harmon758/postgresql-action@v1
         with:
-          postgres db: nc_news_test
+          postgres db: "nc_news_test"
           postgres user: "testUser"
           postgres password: "testPassword"
 
