@@ -12,4 +12,7 @@ This project is set up to utilise a test and a development database with the env
 To run this project locally you must first clone the repository using the appropriate link in the code dropdown menu for the desired method. Once cloned, run `npm install` command in Node.js, this will install all the packages required to run the project. You will see inside the package.json scripts that have been created to handle the set up and seeding of the database. To run these use `npm run <name of script>` command in Node.js.
   
 When running the tests for the API, use command `npm test app.test.js`. The seeding of the database is handled by the test file, however you must ensure that the database has first been created with the setup-db script `npm run setup-dbs`.
+
+PostgresSQL v15.1 
+Node v18.12.1
   
