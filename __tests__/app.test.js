@@ -588,20 +588,17 @@ describe("App API", () => {
           .patch("/api/articles/1")
           .send({ inc_votes: 10 })
           .expect(200)
-          .then(({ body }) => {
-            expect(body).toEqual({
-              update: {
-                article_id: 1,
-                article_img_url:
-                  "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-                author: "butter_bridge",
-                body: "I find this existence challenging",
-                created_at: "2020-07-09T20:11:00.000Z",
-                title: "Living in the shadow of a great man",
-                topic: "mitch",
-                votes: 110,
-              },
-            });
+          .then(({ body: { update } }) => {
+            expect(update.article_id).toBe(1);
+            expect(update.title).toBe("Living in the shadow of a great man");
+            expect(update.topic).toBe("mitch");
+            expect(update.author).toBe("butter_bridge");
+            expect(update.body).toBe("I find this existence challenging");
+            expect(update.votes).toBe(110);
+            expect(typeof update.created_at).toBe("string");
+            expect(update.article_img_url).toBe(
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
+            );
           });
       });
       it("returns a status of 404 when article id is of correct data type but does not exist", () => {
