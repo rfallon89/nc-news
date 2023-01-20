@@ -100,7 +100,7 @@ describe("App API", () => {
       });
     });
     describe("GET request with queries", () => {
-      it("accepts a query to filter by topic value, if no query then returns all articles by default responding with a status 200", () => {
+      it("accepts a query to filter by topic value", () => {
         return request(app)
           .get("/api/articles?topic=mitch")
           .expect(200)
@@ -424,6 +424,14 @@ describe("App API", () => {
             expect(comments).toBeSortedBy("created_at", { descending: true });
           });
       });
+      it("returns an empty array if no comments made about the article", () => {
+        return request(app)
+          .get("/api/articles/2/comments")
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toEqual([]);
+          });
+      });
       it("returns 400 if article id is wrong data type", () => {
         return request(app)
           .get("/api/articles/one/comments")
@@ -432,18 +440,18 @@ describe("App API", () => {
             expect(body).toEqual({ message: "Bad Request" });
           });
       });
-      it("returns 404 if article id is correct data type but does not exist", () => {
+      it("returns 404 if the article ID does not exist", () => {
         return request(app)
           .get("/api/articles/999/comments")
           .expect(404)
           .then(({ body }) => {
             expect(body).toEqual({
-              message: "No comments",
+              message: "Article ID does not exist",
             });
           });
       });
     });
-    describe("Query by author to GET request for comment by article id", () => {
+    describe("GET request with QUERIES for comment by article id", () => {
       it("returns a json object with the relevant information", () => {
         return request(app)
           .get("/api/articles/1/comments?author=butter_bridge")
@@ -460,6 +468,14 @@ describe("App API", () => {
             });
           });
       });
+      it("returns 404 if the article ID does not exist", () => {
+        return request(app)
+          .get("/api/articles/999/comments?author=butter_bridge")
+          .expect(404)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("Article ID does not exist");
+          });
+      });
       it("returns 404 if author does not exist", () => {
         return request(app)
           .get("/api/articles/1/comments?author=butter")
@@ -468,18 +484,15 @@ describe("App API", () => {
             expect(body).toEqual({ message: "Username does not exist" });
           });
       });
-      it("returns 404 if no comments made by the author", () => {
+      it("returns an empty array if no comments made by the author about the article", () => {
         return request(app)
           .get("/api/articles/6/comments?author=icellusedkars")
-          .expect(404)
-          .then(({ body }) => {
-            expect(body).toEqual({
-              message: "No comments",
-            });
+          .expect(200)
+          .then(({ body: { comments } }) => {
+            expect(comments).toEqual([]);
           });
       });
-    });
-    describe("GET request with QUERIES for comment by article id", () => {
+
       it("returns a status of 200 and a default limit of 10 to the return when successfully reached", () => {
         return request(app)
           .get("/api/articles/1/comments")

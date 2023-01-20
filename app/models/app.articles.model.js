@@ -98,32 +98,28 @@ exports.fetchArticleComments = (
   if (author) {
     let username = author;
     return fetchUsersByUsername({ username }).then(() => {
-      return query(sql, queryValues).then(({ rows: comment }) => {
+      return Promise.all([
+        query(sql, queryValues),
+        exports.fetchArticle({ article_id }),
+      ]).then(([{ rows: comment }]) => {
         if (!comment[0] & (p > 1)) {
           return Promise.reject({
             status: 404,
             msg: "Page Not Found",
-          });
-        } else if (!comment[0]) {
-          return Promise.reject({
-            status: 404,
-            msg: "No comments",
           });
         }
         return comment;
       });
     });
   } else {
-    return query(sql, queryValues).then(({ rows: comment }) => {
+    return Promise.all([
+      query(sql, queryValues),
+      exports.fetchArticle({ article_id }),
+    ]).then(([{ rows: comment }]) => {
       if (!comment[0] & (p > 1)) {
         return Promise.reject({
           status: 404,
           msg: "Page Not Found",
-        });
-      } else if (!comment[0]) {
-        return Promise.reject({
-          status: 404,
-          msg: "No comments",
         });
       }
       return comment;
