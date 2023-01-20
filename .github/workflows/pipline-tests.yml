@@ -37,15 +37,15 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install Dependencies
-        run: npm i
-
       - name: Use PostgresSQL
         uses: harmon758/postgresql-action@v1
         with:
           postgres db: nc_news_test
           postgres user: "testUser"
           postgres password: "testPassword"
+
+      - name: Install Dependencies
+        run: npm i
 
       - name: Run Tests
         run: PGDATABASE=nc_news_test PGUSER=testUser PGPASSWORD=testPassword npm t app
