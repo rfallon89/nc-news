@@ -877,7 +877,7 @@ describe("App API", () => {
           });
       });
     });
-    describe.only("POST request", () => {
+    describe("POST request", () => {
       it("returns a status of 201 with a message of confirmation", () => {
         return request(app)
           .post("/api/users")
