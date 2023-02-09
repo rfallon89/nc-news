@@ -31,3 +31,11 @@ exports.fetchUsers = ({ limit = 10, p = 1, order = "asc" }) => {
     return users;
   });
 };
+
+exports.addUser = ({ username, name, avatar_url }) => {
+  let sql = `INSERT INTO users
+  (username,name,avatar_url) VALUES ($1,$2,$3) RETURNING *`;
+  return db
+    .query(sql, [username, name, avatar_url])
+    .then(({ rows: [user] }) => user);
+};

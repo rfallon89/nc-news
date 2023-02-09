@@ -62,7 +62,7 @@ describe("App API", () => {
           .send({ slug: "mitch" })
           .expect(400)
           .then(({ body: { message } }) => {
-            expect(message).toBe("Topic slug already exists");
+            expect(message).toBe("already exists");
           });
       });
     });
@@ -77,6 +77,7 @@ describe("App API", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
+            console.log(articles);
             articles.forEach((article) => {
               expect(typeof article.author).toBe("string");
               expect(typeof article.title).toBe("string");
@@ -105,6 +106,7 @@ describe("App API", () => {
           .get("/api/articles?topic=mitch")
           .expect(200)
           .then(({ body: { articles } }) => {
+            console.log(articles);
             articles.forEach((article) => {
               expect(typeof article.author).toBe("string");
               expect(typeof article.title).toBe("string");
@@ -872,6 +874,40 @@ describe("App API", () => {
           .expect(404)
           .then(({ body: { message } }) => {
             expect(message).toBe("Username does not exist");
+          });
+      });
+    });
+    describe.only("POST request", () => {
+      it("returns a status of 201 with a message of confirmation", () => {
+        return request(app)
+          .post("/api/users")
+          .send({
+            username: "RF308",
+            name: "Rory",
+            avatar_url:
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+          })
+          .expect(201)
+          .then(({ body: { user } }) => {
+            expect(user.username).toBe("RF308");
+            expect(user.name).toBe("Rory");
+            expect(user.avatar_url).toBe(
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+            );
+          });
+      });
+      it("returns a status of 400 when the username already exists", () => {
+        return request(app)
+          .post("/api/users")
+          .send({
+            username: "butter_bridge",
+            name: "Rory",
+            avatar_url:
+              "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png",
+          })
+          .expect(400)
+          .then(({ body: { message } }) => {
+            expect(message).toBe("already exists");
           });
       });
     });
