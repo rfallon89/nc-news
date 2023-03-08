@@ -4,14 +4,20 @@
   },
   "GET /api/topics": {
     "description": "serves an array of all topics",
-    "queries": [],
     "exampleResponse": {
       "topics": [{ "slug": "football", "description": "Footie!" }]
     }
   },
+  "POST /api/topics": {
+    "description": "creates a topic",
+    "body": { "slug": "topic name", "description": "brief description" },
+    "exampleResponse": {
+      "topic": [{ "slug": "football", "description": "Footie!" }]
+    }
+  },
   "GET /api/articles": {
     "description": "serves an array of all articles sorted by newest first",
-    "queries": ["topic", "sort_by", "order"],
+    "queries": ["topic", "sort_by", "order", "limit", "p"],
     "exampleResponse": {
       "articles": [
         {
@@ -28,9 +34,33 @@
       ]
     }
   },
-  "GET /api/articles:articles_id": {
+  "POST /api/articles": {
+    "description": "Adds an articles",
+    "body": {
+      "author": "lurker",
+      "body": "test1...2",
+      "title": "post test",
+      "topic": "cats",
+      "article_img_url": "...."
+    },
+    "exampleResponse": {
+      "article": [
+        {
+          "title": "Seafood substitutions are increasing",
+          "article id": 1,
+          "topic": "cats",
+          "author": "lurker",
+          "body": "test1...2",
+          "created_at": 1527695953341,
+          "votes": 0,
+          "article img url": "....",
+          "comment count": 0
+        }
+      ]
+    }
+  },
+  "GET /api/articles/:articles_id": {
     "description": "serves an object of the article associated with the id",
-    "queries": [],
     "exampleResponse": {
       "article": {
         "title": "Seafood substitutions are increasing",
@@ -45,9 +75,9 @@
       }
     }
   },
-  "GET /api/articles:articles_id/comments": {
+  "GET /api/articles/:articles_id/comments": {
     "description": "serves an array of all the comments associated with the article id",
-    "queries": [],
+    "queries": ["author", "limit", "p"],
     "exampleResponse": {
       "comments": [
         {
@@ -61,10 +91,9 @@
       ]
     }
   },
-  "PATCH /api/articles:articles_id": {
+  "PATCH /api/articles/:articles_id": {
     "description": "Updates the votes of a article",
     "body": { "inc_votes": 100 },
-    "queries": [],
     "exampleResponse": {
       "update": {
         "title": "Seafood substitutions are increasing",
@@ -78,10 +107,9 @@
       }
     }
   },
-  "POST /api/articles:articles_id": {
+  "POST /api/articles/:articles_id/comments": {
     "description": "Adds a comment to a article",
     "body": { "username": "lurker", "body": "Add comment here" },
-    "queries": [],
     "exampleResponse": {
       "succesful": {
         "author": "lurker",
@@ -93,20 +121,62 @@
       }
     }
   },
-  "DELETE /api/comments:comment_id": {
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes an article",
+    "exampleResponse": {
+      "status": 204
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
     "description": "deletes a comment",
     "queries": [],
     "exampleResponse": {
       "status": 204
     }
   },
+  "PATCH /api/comments/:comment_id": {
+    "description": "Updates the votes of a comment",
+    "body": { "inc_votes": 100 },
+    "exampleResponse": {
+      "updated_comment": {
+        "comment id": 1,
+        "article id": 1,
+        "votes": 110,
+        "author": "weegembump",
+        "body": "Text from the article..",
+        "created_at": 1527695953341
+      }
+    }
+  },
   "GET /api/users": {
     "description": "serves an array of all users",
-    "queries": [],
+    "queries": ["order", "limit", "p"],
     "exampleResponse": {
-      "userss": [
-        { "username": "Mitch89", "name": "Mitch", "avatar url": "url" }
+      "users": [
+        { "username": "Mitch89", "name": "Mitch", "avatar url": "url" },
+        { "username": "lurker", "name": "Gary", "avatar url": "...." }
       ]
+    }
+  },
+  "GET /api/users/:username": {
+    "description": "serves an object of the user associated with the username",
+    "exampleResponse": {
+      "user": { "username": "Mitch89", "name": "Mitch", "avatar url": "url" }
+    }
+  },
+  "POST /api/users": {
+    "description": "Adds a user",
+    "body": {
+      "username": "butter",
+      "name": "Arla",
+      "avatar_url": "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+    },
+    "exampleResponse": {
+      "user": {
+        "username": "butter",
+        "name": "Arla",
+        "avatar_url": "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
+      }
     }
   }
 }

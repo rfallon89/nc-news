@@ -8,7 +8,7 @@ exports.customError = (err, req, res, next) => {
 
 exports.sqlError = (err, req, res, next) => {
   if (err.code === "22P02" || err.code === "08P01" || err.code === "23502") {
-    res.status(400).send({ message: "Bad Request" });
+    res.status(400).send({ message: `Bad Request` });
   } else if (err.code === "23505") {
     res.status(400).send({ message: "already exists" });
   } else {
