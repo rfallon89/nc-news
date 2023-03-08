@@ -77,7 +77,6 @@ describe("App API", () => {
           .get("/api/articles")
           .expect(200)
           .then(({ body: { articles } }) => {
-            console.log(articles);
             articles.forEach((article) => {
               expect(typeof article.author).toBe("string");
               expect(typeof article.title).toBe("string");
